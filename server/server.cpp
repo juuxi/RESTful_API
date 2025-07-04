@@ -103,8 +103,8 @@ void HttpServer::waiter() {
         if (client_fd == -1) {
             sleep(1);
         } else {
-            int* client_fd1 = (int*)malloc(sizeof(int));
-            int* client_fd2 = (int*)malloc(sizeof(int));
+            int* client_fd1 = new int;
+            int* client_fd2 = new int;
             *client_fd1 = client_fd;
             *client_fd2 = client_fd;
 
