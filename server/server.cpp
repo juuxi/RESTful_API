@@ -124,7 +124,7 @@ int main() {
     fcntl(listen_sock, F_SETFL, O_NONBLOCK);
 
     addr.sin_family = AF_INET;
-    addr.sin_port = htons(8080);
+    addr.sin_port = htons(80);
     addr.sin_addr.s_addr = inet_addr("127.0.0.1");
     int rv = bind(listen_sock, (struct sockaddr*)&addr, sizeof(addr));
     if (rv == -1) {
