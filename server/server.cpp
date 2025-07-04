@@ -8,9 +8,10 @@
 #include <iostream>
 
 class HttpServer {
-    public:
     void receive(void* arg);
     void process(void* arg);
+    std::queue<std::string> requst_queue;
+public:
     void waiter();
 };
 
@@ -22,9 +23,7 @@ int listen_sock;
 struct sockaddr_in addr;
 struct sockaddr_in addr2;
 pthread_mutex_t mutex;
-pthread_t id1, id2, id3;
 std::thread *t1 = nullptr, *t2 = nullptr;
-std::queue<std::string> q;
 
 void HttpServer::receive(void* arg) {
     int client_fd = *((int*)arg);
@@ -42,7 +41,7 @@ void HttpServer::receive(void* arg) {
             break;
         } else {
             pthread_mutex_lock(&mutex);
-            q.push(std::string(rcv_msg, rv));
+            requst_queue.push(std::string(rcv_msg, rv));
             pthread_mutex_unlock(&mutex);
         }
     }
@@ -56,9 +55,9 @@ void HttpServer::process(void* arg) {
 
     while (flag_process == 0) {
         pthread_mutex_lock(&mutex);
-        if (!q.empty()) {
-            std::string first_ent = q.front();
-            q.pop();
+        if (!requst_queue.empty()) {
+            std::string first_ent = requst_queue.front();
+            requst_queue.pop();
             pthread_mutex_unlock(&mutex);
 
             std::cout << "Сообщение\n" << first_ent << "Принято" << std::endl;
