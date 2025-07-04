@@ -62,16 +62,20 @@ void HttpServer::process(void* arg) {
 
             std::cout << "Сообщение\n" << first_ent << "Принято" << std::endl;
             std::string http_method = first_ent.substr(0, first_ent.find(' '));
+            std::string endpoint = first_ent.substr(first_ent.find('/') + 1, first_ent.find('H') - first_ent.find('/') - 2);
             char send_msg[256];
             std::string body;
             std::string status_code;
-            if (http_method == "GET"); {
+            if (http_method == "GET" && endpoint == "borough"); {
                 body = "Hello from server\n";
                 status_code = "200 OK";
             }
-            if (http_method == "POST") {
+            if (http_method == "POST" && endpoint == "borough") {
                 body = "You're not allowed to watch this\n";
                 status_code = "403 Forbidden";
+            }
+            if (endpoint != "borough") {
+                status_code = "400 Bad Request";
             }
             sprintf(send_msg,
                 "HTTP/1.1 %s\r\n"
@@ -123,7 +127,7 @@ int main() {
     fcntl(listen_sock, F_SETFL, O_NONBLOCK);
 
     addr.sin_family = AF_INET;
-    addr.sin_port = htons(80);
+    addr.sin_port = htons(8080);
     addr.sin_addr.s_addr = inet_addr("127.0.0.1");
     int rv = bind(listen_sock, (struct sockaddr*)&addr, sizeof(addr));
     if (rv == -1) {

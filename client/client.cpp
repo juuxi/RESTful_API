@@ -19,12 +19,13 @@ void func1() {
     std::string http_method = "GET";
     char send_msg[256];
     while(flag_send == 0) {
+        std::string endpoint = "borough";
         sprintf(send_msg, 
-            "%s / HTTP/1.1\r\n"
+            "%s /%s HTTP/1.1\r\n"
             "Host: localhost:8080\r\n"
             "User-Agent: curl/8.5.0\r\n"
             "Accept: */*\r\n"
-            "\r\n", http_method.c_str());
+            "\r\n", http_method.c_str(), endpoint.c_str());
 
         int rv = send(server_sock, send_msg, strlen(send_msg), 0);
         if (rv == -1) {
@@ -84,7 +85,7 @@ int main() {
     fcntl(server_sock, F_SETFL, O_NONBLOCK);
 
     addr.sin_family = AF_INET;
-    addr.sin_port = htons(80);
+    addr.sin_port = htons(8080);
     addr.sin_addr.s_addr = inet_addr("127.0.0.1");
     int rv = bind(server_sock, (struct sockaddr*)&addr, sizeof(addr));
     if (rv == -1) {
