@@ -6,6 +6,7 @@
 #include <queue>
 #include <string>
 #include <iostream>
+#include "postgreconn.hpp"
 
 class HttpServer {
     void receive(void* arg);
