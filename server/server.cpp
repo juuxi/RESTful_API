@@ -7,6 +7,7 @@
 #include <string>
 #include <iostream>
 #include "postgreconn.hpp"
+#include <fstream>
 
 class HttpServer {
     void receive(void* arg);
@@ -70,10 +71,12 @@ void HttpServer::process(void* arg) {
 
             if (endpoint == "borough") {
                 if (http_method == "GET") {
-                    continue;
+                    body = "Hello from server\n";
+                    status_code = "200 OK";
                 }
                 if (http_method == "POST") {
-                    continue;
+                    body = "Hello from server\n";
+                    status_code = "200 OK";
                 }
             }
 
@@ -134,8 +137,27 @@ void HttpServer::waiter() {
 }
 
 int main() {
-    HttpServer server;
     printf("программа сервера начала работу\n");
+    HttpServer server;
+    std::fstream db_info("db_info.txt");
+    std::string db_name;
+    std::string db_user;
+    std::string db_pass;
+    std::getline(db_info, db_name);
+    std::getline(db_info, db_user);
+    std::getline(db_info, db_pass);
+    PGConnection pg(db_name, db_user, db_pass);
+    db_info.close();
+
+    /* if (pg.res) {
+        PQexec(pg.res, "CREATE TABLE IF NOT EXISTS one ( \
+                        id SERIAL PRIMARY KEY, \
+                        name TEXT, \
+                        population INTEGER, \
+                        area INTEGER \
+                        )");
+    } */
+
     pthread_mutex_init(&mutex, NULL);
 
     listen_sock = socket(AF_INET, SOCK_STREAM, 0);
