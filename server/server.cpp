@@ -66,17 +66,31 @@ void HttpServer::process(void* arg) {
             char send_msg[256];
             std::string body;
             std::string status_code;
-            if (http_method == "GET" && endpoint == "borough"); {
-                body = "Hello from server\n";
-                status_code = "200 OK";
+
+            if (endpoint == "borough") {
+                if (http_method == "GET") {
+                    continue;
+                }
+                if (http_method == "POST") {
+                    continue;
+                }
             }
-            if (http_method == "POST" && endpoint == "borough") {
-                body = "You're not allowed to watch this\n";
-                status_code = "403 Forbidden";
+
+            else if (endpoint == "ping") {
+                if (http_method == "GET") {
+                    body = "Hello from server\n";
+                    status_code = "200 OK";
+                }
+                if (http_method == "POST") {
+                    body = "You're not allowed to watch this\n";
+                    status_code = "403 Forbidden";
+                }
             }
-            if (endpoint != "borough") {
+
+            else {
                 status_code = "400 Bad Request";
             }
+
             sprintf(send_msg,
                 "HTTP/1.1 %s\r\n"
                 "Content-Type: text/plain\r\n"
