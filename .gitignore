@@ -1,1 +1,6 @@
 server/db_info.txt
+build/CMakeFiles
+build/cmake_install.cmake
+build/CMakeCache.txt
+common/example.cpp
+common/example
