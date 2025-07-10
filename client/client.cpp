@@ -20,12 +20,14 @@ void func1() {
     char send_msg[256];
     while(flag_send == 0) {
         std::string endpoint = "borough";
+        std::string body = R"({ "name": "Manhattan", "population": "1000000", "area": "100"})";
         sprintf(send_msg, 
             "%s /%s HTTP/1.1\r\n"
             "Host: localhost:8080\r\n"
             "User-Agent: curl/8.5.0\r\n"
             "Accept: */*\r\n"
-            "\r\n", http_method.c_str(), endpoint.c_str());
+            "\r\n"
+            "%s", http_method.c_str(), endpoint.c_str(), body.c_str());
 
         int rv = send(server_sock, send_msg, strlen(send_msg), 0);
         if (rv == -1) {

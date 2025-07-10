@@ -8,7 +8,7 @@
 #include <iostream>
 #include "postgreconn.hpp"
 #include <fstream>
-#include "json.hpp"
+#include "../common/json.hpp" 
 
 class HttpServer {
     void receive(void* arg);
@@ -66,6 +66,10 @@ void HttpServer::process(void* arg) {
             std::cout << "Сообщение\n" << first_ent << "Принято" << std::endl;
             std::string http_method = first_ent.substr(0, first_ent.find(' '));
             std::string endpoint = first_ent.substr(first_ent.find('/') + 1, first_ent.find('H') - first_ent.find('/') - 2);
+            std::string entry_body = first_ent.substr(first_ent.find('{'));
+            nlohmann::json data = nlohmann::json::parse(entry_body);
+            std::cout << data.back();
+            
             char send_msg[256];
             std::string body;
             std::string status_code;
@@ -140,7 +144,7 @@ void HttpServer::waiter() {
 int main() {
     printf("программа сервера начала работу\n");
     HttpServer server;
-    std::fstream db_info("db_info.txt");
+    /* std::fstream db_info("db_info.txt");
     std::string db_name;
     std::string db_user;
     std::string db_pass;
@@ -149,7 +153,7 @@ int main() {
     std::getline(db_info, db_pass);
     PGConnection pg(db_name, db_user, db_pass);
     db_info.close();
-
+ */
     /* if (pg.res) {
         PQexec(pg.res, "CREATE TABLE IF NOT EXISTS one ( \
                         id SERIAL PRIMARY KEY, \
