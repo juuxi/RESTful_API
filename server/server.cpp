@@ -16,7 +16,7 @@ class HttpServer {
     void process(void* arg);
     std::queue<std::string> requst_queue;
 public:
-    void waiter();
+    void waiter(void* arg);
 };
 
 int flag_rcv = 0;
@@ -54,7 +54,13 @@ void HttpServer::receive(void* arg) {
 }
 
 void HttpServer::process(void* arg) {
-    int client_fd = *((int*)arg);
+    std::pair<int*, PGConnection*>* args = static_cast<std::pair<int*, PGConnection*>*>(arg);
+    int client_fd = *args->first;
+    PGConnection* pg = args->second;
+
+    if (!pg->res) {
+        std::cout << "aa";
+    }
     printf("поток обработки начал работу\n");
 
     while (flag_process == 0) {
@@ -76,12 +82,25 @@ void HttpServer::process(void* arg) {
 
             if (endpoint == "borough") {
                 if (http_method == "GET") {
-                    if (data.find("area") != data.end()) {
-                        std::string s = data["area"];
-                        int num = std::stoi(s);
-                        std::cout << num;
+                    if (data.find("what") != data.end()) {
+                        std::string what = data["what"];
                     }
-                    std::cout << std::endl;
+                    if (data.find("where") != data.end()) {
+                        std::string where = data["where"];
+                    }
+                    if (pg->res) {
+                        PQexec(pg->res, "CREATE TABLE IF NOT EXISTS one ( \
+                            id SERIAL PRIMARY KEY, \
+                            name TEXT, \
+                            population INTEGER, \
+                            area INTEGER \
+                            )");
+                    }
+
+                    else {
+                        std::cout << std::endl << "ERROR!" << std::endl << std::endl;
+                    }
+
                     body = "Hello from server\n";
                     status_code = "200 OK";
                 }
@@ -123,11 +142,14 @@ void HttpServer::process(void* arg) {
         }
     }
     close(client_fd);
+    free(((int*)arg));
     printf("поток обработки закончил работу\n");
 }
 
 
-void HttpServer::waiter() {
+void HttpServer::waiter(void* arg) {
+    PGConnection* pg = (PGConnection*)arg;
+
     printf("поток ожидания соединений начал работу\n");
     while (flag_wait == 0) {
         socklen_t len = sizeof(addr);
@@ -140,8 +162,11 @@ void HttpServer::waiter() {
             *client_fd1 = client_fd;
             *client_fd2 = client_fd;
 
+            std::pair<int*, PGConnection*>* p = new std::pair<int*, PGConnection*>;
+            p->first = client_fd2;
+            p->second = pg;
             t1 = new std::thread(&HttpServer::receive, this, client_fd1);
-            t2 = new std::thread(&HttpServer::process, this, client_fd2);
+            t2 = new std::thread(&HttpServer::process, this, p);
         }
     }
     printf("поток ожидания соединений закончил работу\n");
@@ -198,7 +223,7 @@ int main() {
     listen(listen_sock, 100);
 
 
-    std::thread t3(&HttpServer::waiter, server);
+    std::thread t3(&HttpServer::waiter, server, &pg);
     printf("программа ждет нажатия клавиши\n");
     getchar();
     printf("клавиша нажата\n");
