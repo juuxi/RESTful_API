@@ -11,6 +11,7 @@ public:
     PGConnection(std::string _dbname, std::string _dbuser, std::string _dbpass);
     std::shared_ptr<PGconn> connection() const;
     PGconn* res;
+    ~PGConnection() {PQfinish(res);}
 
 private:
     void establish_connection();

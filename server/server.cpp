@@ -69,7 +69,6 @@ void HttpServer::process(void* arg) {
             std::string endpoint = first_ent.substr(first_ent.find('/') + 1, first_ent.find('H') - first_ent.find('/') - 2);
             std::string entry_body = first_ent.substr(first_ent.find('{'));
             nlohmann::json data = nlohmann::json::parse(entry_body);
-            std::cout << data.back();
             
             char send_msg[256];
             std::string body;
@@ -77,6 +76,12 @@ void HttpServer::process(void* arg) {
 
             if (endpoint == "borough") {
                 if (http_method == "GET") {
+                    if (data.find("area") != data.end()) {
+                        std::string s = data["area"];
+                        int num = std::stoi(s);
+                        std::cout << num;
+                    }
+                    std::cout << std::endl;
                     body = "Hello from server\n";
                     status_code = "200 OK";
                 }
@@ -145,7 +150,7 @@ void HttpServer::waiter() {
 int main() {
     printf("программа сервера начала работу\n");
     HttpServer server;
-    /* std::fstream db_info("db_info.txt");
+    std::fstream db_info("../server/db_info.txt");
     std::string db_name;
     std::string db_user;
     std::string db_pass;
@@ -154,15 +159,24 @@ int main() {
     std::getline(db_info, db_pass);
     PGConnection pg(db_name, db_user, db_pass);
     db_info.close();
- */
-    /* if (pg.res) {
-        PQexec(pg.res, "CREATE TABLE IF NOT EXISTS one ( \
+
+    if (pg.res) {
+        PGresult* result = PQexec(pg.res, "CREATE TABLE IF NOT EXISTS one ( \
                         id SERIAL PRIMARY KEY, \
                         name TEXT, \
                         population INTEGER, \
                         area INTEGER \
                         )");
-    } */
+
+        if (PQresultStatus(result) == PGRES_COMMAND_OK) {
+            std::cout << "Table 'one' created successfully." << std::endl;
+        } else {
+            std::cerr << "Failed to create table: " << PQerrorMessage(pg.res) << std::endl;
+        }
+    }
+    else {
+        std::cout << std::endl << std::endl << "no, lol" << std::endl << std::endl;
+    }
 
     pthread_mutex_init(&mutex, NULL);
 
