@@ -166,6 +166,30 @@ client/client.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/client.dir/build.make CMakeFiles/client.dir/client/client.cpp.s
 .PHONY : client/client.cpp.s
 
+server/dp.o: server/dp.cpp.o
+.PHONY : server/dp.o
+
+# target to build an object file
+server/dp.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/server.dir/build.make CMakeFiles/server.dir/server/dp.cpp.o
+.PHONY : server/dp.cpp.o
+
+server/dp.i: server/dp.cpp.i
+.PHONY : server/dp.i
+
+# target to preprocess a source file
+server/dp.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/server.dir/build.make CMakeFiles/server.dir/server/dp.cpp.i
+.PHONY : server/dp.cpp.i
+
+server/dp.s: server/dp.cpp.s
+.PHONY : server/dp.s
+
+# target to generate assembly for a file
+server/dp.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/server.dir/build.make CMakeFiles/server.dir/server/dp.cpp.s
+.PHONY : server/dp.cpp.s
+
 server/server.o: server/server.cpp.o
 .PHONY : server/server.o
 
@@ -203,6 +227,9 @@ help:
 	@echo "... client/client.o"
 	@echo "... client/client.i"
 	@echo "... client/client.s"
+	@echo "... server/dp.o"
+	@echo "... server/dp.i"
+	@echo "... server/dp.s"
 	@echo "... server/server.o"
 	@echo "... server/server.i"
 	@echo "... server/server.s"

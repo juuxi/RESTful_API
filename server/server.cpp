@@ -8,7 +8,8 @@
 #include <iostream>
 #include "postgreconn.hpp"
 #include <fstream>
-#include "../common/json.hpp" 
+#include "json.hpp" 
+#include "db.hpp"
 
 class HttpServer {
     void receive(void* arg);
