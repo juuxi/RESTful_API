@@ -54,14 +54,10 @@ void HttpServer::receive(void* arg) {
 }
 
 void HttpServer::process(void* arg) {
+    printf("поток обработки начал работу\n");
     std::pair<int*, PGConnection*>* args = static_cast<std::pair<int*, PGConnection*>*>(arg);
     int client_fd = *args->first;
     PGConnection* pg = args->second;
-
-    if (!pg->res) {
-        std::cout << "aa";
-    }
-    printf("поток обработки начал работу\n");
 
     while (flag_process == 0) {
         pthread_mutex_lock(&mutex);
@@ -74,7 +70,10 @@ void HttpServer::process(void* arg) {
             std::string http_method = first_ent.substr(0, first_ent.find(' '));
             std::string endpoint = first_ent.substr(first_ent.find('/') + 1, first_ent.find('H') - first_ent.find('/') - 2);
             std::string entry_body = first_ent.substr(first_ent.find('{'));
-            nlohmann::json data = nlohmann::json::parse(entry_body);
+            nlohmann::json data;
+            if (!entry_body.empty()) {
+                data = nlohmann::json::parse(entry_body);
+            }
             
             char send_msg[256];
             std::string body;
@@ -83,10 +82,10 @@ void HttpServer::process(void* arg) {
             if (endpoint == "borough") {
                 if (http_method == "GET") {
                     std::string what, where;
-                    if (data.find("what") != data.end()) {
+                    if (data.find("what") != data.end()) { //какие данные нужно вернуть
                         what = data["what"];
                     }
-                    if (data.find("where") != data.end()) {
+                    if (data.find("where") != data.end()) { //условие
                         where = data["where"];
                     }
                     if (pg->res) {
@@ -94,17 +93,19 @@ void HttpServer::process(void* arg) {
                         sprintf(query, "SELECT %s FROM one \
                             WHERE %s", what.c_str(), where.c_str());
                         PGresult* res = PQexec(pg->res, query);
-                        std::cout << PQgetvalue(res, 0, 0) << std::endl; //вернуть первую ячейку в возвращемой таблице
+                        std::cout << PQgetvalue(res, 0, 0) << std::endl; //вывести первую ячейку в возвращемой таблице
+                        body = "Will get your data later\n";
+                        status_code = "200 OK";
                     }
 
                     else {
-                        std::cout << std::endl << "ERROR!" << std::endl << std::endl;
+                        std::cout << std::endl << "No connection to db" << std::endl << std::endl;
+                        status_code = "503 Service unavailable";
+                        body = "";
                     }
 
-                    body = "Hello from server\n";
-                    status_code = "200 OK";
                 }
-                if (http_method == "POST") {
+                if (http_method == "POST") { //будет написано позже
                     body = "Hello from server\n";
                     status_code = "200 OK";
                 }
@@ -121,11 +122,11 @@ void HttpServer::process(void* arg) {
                 }
             }
 
-            else {
+            else { //неизвестный endpoint
                 status_code = "400 Bad Request";
             }
 
-            sprintf(send_msg,
+            sprintf(send_msg, //создание ответного HTTP-запроса
                 "HTTP/1.1 %s\r\n"
                 "Content-Type: text/plain\r\n"
                 "Content-Length: %d\r\n"
@@ -148,7 +149,7 @@ void HttpServer::process(void* arg) {
 
 
 void HttpServer::waiter(void* arg) {
-    PGConnection* pg = (PGConnection*)arg;
+    PGConnection* pg = (PGConnection*)arg; //для дальнейшей передачи в process
 
     printf("поток ожидания соединений начал работу\n");
     while (flag_wait == 0) {
@@ -162,7 +163,7 @@ void HttpServer::waiter(void* arg) {
             *client_fd1 = client_fd;
             *client_fd2 = client_fd;
 
-            std::pair<int*, PGConnection*>* p = new std::pair<int*, PGConnection*>;
+            std::pair<int*, PGConnection*>* p = new std::pair<int*, PGConnection*>; //требуется передать сразу 2 аргумента
             p->first = client_fd2;
             p->second = pg;
             t1 = new std::thread(&HttpServer::receive, this, client_fd1);
@@ -175,7 +176,7 @@ void HttpServer::waiter(void* arg) {
 int main() {
     printf("программа сервера начала работу\n");
     HttpServer server;
-    std::fstream db_info("../server/db_info.txt");
+    std::fstream db_info("../server/db_info.txt"); //подключение к БД, данные берутся из скрытого для посторонних глаз текстового файла
     std::string db_name;
     std::string db_user;
     std::string db_pass;
@@ -184,24 +185,6 @@ int main() {
     std::getline(db_info, db_pass);
     PGConnection pg(db_name, db_user, db_pass);
     db_info.close();
-
-    if (pg.res) {
-        PGresult* result = PQexec(pg.res, "CREATE TABLE IF NOT EXISTS one ( \
-                        id SERIAL PRIMARY KEY, \
-                        name TEXT, \
-                        population INTEGER, \
-                        area INTEGER \
-                        )");
-
-        if (PQresultStatus(result) == PGRES_COMMAND_OK) {
-            std::cout << "Table 'one' created successfully." << std::endl;
-        } else {
-            std::cerr << "Failed to create table: " << PQerrorMessage(pg.res) << std::endl;
-        }
-    }
-    else {
-        std::cout << std::endl << std::endl << "no, lol" << std::endl << std::endl;
-    }
 
     pthread_mutex_init(&mutex, NULL);
 
