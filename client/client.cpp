@@ -20,7 +20,7 @@ void func1() {
     char send_msg[256];
     while(flag_send == 0) {
         std::string endpoint = "borough";
-        std::string body = R"({ "what": "borough", "where": "area=100"})";
+        std::string body = R"({ "what": "name", "where": "area=100"})";
         sprintf(send_msg, 
             "%s /%s HTTP/1.1\r\n"
             "Host: localhost:8080\r\n"

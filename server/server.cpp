@@ -82,19 +82,19 @@ void HttpServer::process(void* arg) {
 
             if (endpoint == "borough") {
                 if (http_method == "GET") {
+                    std::string what, where;
                     if (data.find("what") != data.end()) {
-                        std::string what = data["what"];
+                        what = data["what"];
                     }
                     if (data.find("where") != data.end()) {
-                        std::string where = data["where"];
+                        where = data["where"];
                     }
                     if (pg->res) {
-                        PQexec(pg->res, "CREATE TABLE IF NOT EXISTS one ( \
-                            id SERIAL PRIMARY KEY, \
-                            name TEXT, \
-                            population INTEGER, \
-                            area INTEGER \
-                            )");
+                        char query[256];
+                        sprintf(query, "SELECT %s FROM one \
+                            WHERE %s", what.c_str(), where.c_str());
+                        PGresult* res = PQexec(pg->res, query);
+                        std::cout << PQgetvalue(res, 0, 0) << std::endl; //вернуть первую ячейку в возвращемой таблице
                     }
 
                     else {
