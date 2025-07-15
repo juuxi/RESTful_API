@@ -94,7 +94,11 @@ void HttpServer::process(void* arg) {
                             WHERE %s", what.c_str(), where.c_str());
                         PGresult* res = PQexec(pg->res, query);
                         std::cout << PQgetvalue(res, 0, 0) << std::endl; //вывести первую ячейку в возвращемой таблице
-                        body = "Will get your data later\n";
+                        /* body = R"({ "what": "name", "where": "area=100"})"; */
+                        nlohmann::json j;
+                        j["result"] = PQgetvalue(res, 0, 0);
+                        body = j.dump();
+                        std::cout << body << std::endl << std::endl;
                         status_code = "200 OK";
                     }
 

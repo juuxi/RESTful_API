@@ -6,6 +6,7 @@
 #include <arpa/inet.h>
 #include <iostream>
 #include <string>
+#include "json.hpp"
 
 int flag_connect = 0;
 int flag_send = 0;
@@ -56,7 +57,17 @@ void func2() {
             sleep(1);
         }
         else {
-            printf("%s", rcv_msg);
+            std::string curr(rcv_msg, rv); //потенциально в rcv_msg попадает несколько ответов за раз
+            std::string entry_body = curr.substr(curr.find('{'), curr.find('}') - curr.find('{') + 1);
+            nlohmann::json data;
+            if (!entry_body.empty()) {
+                data = nlohmann::json::parse(entry_body);
+            } 
+            std::string result;
+            if (data.find("result") != data.end()) {
+                result = data["result"];
+            }
+            printf("%s\n", result.c_str());
         }
        sleep(1);
     }
