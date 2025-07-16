@@ -6,7 +6,7 @@
 #include <arpa/inet.h>
 #include <iostream>
 #include <string>
-#include "json.hpp"
+#include "../common/json.hpp"
 
 int flag_connect = 0;
 int flag_send = 0;
@@ -36,7 +36,7 @@ void func1() {
             sleep(1);
         }
         else {
-            http_method == "GET" ? http_method = "POST" : http_method = "GET";
+            /* http_method == "GET" ? http_method = "POST" : http_method = "GET" */;
             sleep(2);
         }
     }
@@ -57,20 +57,26 @@ void func2() {
             sleep(1);
         }
         else {
-            std::string curr(rcv_msg, rv); //в rcv_msg попадает несколько ответов за раз
-            int content_length_start = curr.find("Content-Length: ") + 16, content_length_end = curr.find("\r\n", curr.find("Content-Length: "));
-            int length = std::stoi(curr.substr(content_length_start, content_length_end - content_length_start));
+            std::string curr(rcv_msg, rv); 
+            
+            while (!curr.empty()) {
+                int content_length_start = curr.find("Content-Length: ") + 16, content_length_end = curr.find("\r\n", curr.find("Content-Length: "));
+                int length = std::stoi(curr.substr(content_length_start, content_length_end - content_length_start));
 
-            std::string entry_body = curr.substr(curr.find('{'), length);
-            nlohmann::json data;
-            if (!entry_body.empty()) {
-                data = nlohmann::json::parse(entry_body);
-            } 
-            std::string result;
-            if (data.find("result") != data.end()) {
-                result = data["result"];
+                std::string entry_body = curr.substr(curr.find('{'), length);
+                nlohmann::json data;
+                if (!entry_body.empty()) {
+                    data = nlohmann::json::parse(entry_body);
+                } 
+                std::string result;
+                if (data.find("result") != data.end()) {
+                    result = data["result"];
+                }
+                printf("%s\n", result.c_str());
+                if (curr.find('}') != curr.npos) {
+                    curr.erase(0, curr.find('}') + 1);
+                }
             }
-            printf("%s\n", result.c_str());
         }
        sleep(1);
     }
