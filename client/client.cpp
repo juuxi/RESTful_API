@@ -6,7 +6,7 @@
 #include <arpa/inet.h>
 #include <iostream>
 #include <string>
-#include "../common/json.hpp"
+#include "json.hpp"
 
 int flag_connect = 0;
 int flag_send = 0;
@@ -17,12 +17,17 @@ std::thread *t1 = nullptr, *t2 = nullptr;
 
 void func1() {
     printf("поток отправки запросов начал работу\n");
-    std::string http_method = "POST";
+    std::string http_method = "GET";
     char send_msg[256];
     while(flag_send == 0) {
         std::string endpoint = "borough";
-        //std::string body = R"({ "what": "name", "where": "area=100"})"; //создание запроса с json-телом
-        std::string body = R"({ "name": "Queens", "area": "50"})"; //создание запроса с json-телом
+        std::string body;
+        if (http_method == "GET") {
+            body = R"({ "what": "name", "where": "area=100"})"; //создание запроса с json-телом
+        }
+        else {
+            body = R"({ "name": "Queens", "area": "50"})"; //создание запроса с json-телом
+        }
         sprintf(send_msg, 
             "%s /%s HTTP/1.1\r\n"
             "Host: localhost:8080\r\n"
@@ -37,7 +42,7 @@ void func1() {
             sleep(1);
         }
         else {
-            /* http_method == "GET" ? http_method = "POST" : http_method = "GET" */;
+            http_method == "GET" ? http_method = "POST" : http_method = "GET";
             sleep(2);
         }
     }
@@ -58,27 +63,30 @@ void func2() {
             sleep(1);
         }
         else {
-            std::cout << "all good" << std::endl;
-            /* std::string curr(rcv_msg, rv); 
+            std::string curr(rcv_msg, rv); 
             
             while (!curr.empty()) {
                 int content_length_start = curr.find("Content-Length: ") + 16, content_length_end = curr.find("\r\n", curr.find("Content-Length: "));
                 int length = std::stoi(curr.substr(content_length_start, content_length_end - content_length_start));
 
-                std::string entry_body = curr.substr(curr.find('{'), length);
-                nlohmann::json data;
-                if (!entry_body.empty()) {
-                    data = nlohmann::json::parse(entry_body);
-                } 
-                std::string result;
-                if (data.find("result") != data.end()) {
-                    result = data["result"];
+                if (curr.find('{') != curr.npos) {
+                    std::string entry_body = curr.substr(curr.find('{'), length);
+                    nlohmann::json data;
+                    if (!entry_body.empty()) {
+                        data = nlohmann::json::parse(entry_body);
+                    } 
+                    std::string result;
+                    if (data.find("result") != data.end()) {
+                        result = data["result"];
+                    }
+                    
+                    printf("%s\n", result.c_str());
                 }
-                printf("%s\n", result.c_str());
-                if (curr.find('}') != curr.npos) {
-                    curr.erase(0, curr.find('}') + 1);
+                else {
+                    std::cout << "POST good" << std::endl;
                 }
-            } */
+                curr.erase(0, curr.find("HTTP/1.1", 9));
+            }
         }
        sleep(1);
     }
