@@ -17,11 +17,12 @@ std::thread *t1 = nullptr, *t2 = nullptr;
 
 void func1() {
     printf("поток отправки запросов начал работу\n");
-    std::string http_method = "GET";
+    std::string http_method = "POST";
     char send_msg[256];
     while(flag_send == 0) {
         std::string endpoint = "borough";
-        std::string body = R"({ "what": "name", "where": "area=100"})"; //создание запроса с json-телом
+        //std::string body = R"({ "what": "name", "where": "area=100"})"; //создание запроса с json-телом
+        std::string body = R"({ "name": "Queens", "area": "50"})"; //создание запроса с json-телом
         sprintf(send_msg, 
             "%s /%s HTTP/1.1\r\n"
             "Host: localhost:8080\r\n"
@@ -57,7 +58,8 @@ void func2() {
             sleep(1);
         }
         else {
-            std::string curr(rcv_msg, rv); 
+            std::cout << "all good" << std::endl;
+            /* std::string curr(rcv_msg, rv); 
             
             while (!curr.empty()) {
                 int content_length_start = curr.find("Content-Length: ") + 16, content_length_end = curr.find("\r\n", curr.find("Content-Length: "));
@@ -76,7 +78,7 @@ void func2() {
                 if (curr.find('}') != curr.npos) {
                     curr.erase(0, curr.find('}') + 1);
                 }
-            }
+            } */
         }
        sleep(1);
     }
