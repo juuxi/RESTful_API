@@ -1,3 +1,5 @@
+#pragma once
+
 #include <memory>
 #include <string>
 #include <stdexcept>
@@ -8,7 +10,10 @@ class PGConnection
 {
 public:
     PGConnection();
-    PGConnection(std::string _dbname, std::string _dbuser, std::string _dbpass);
+    void set_dbname(std::string _dbname) {m_dbname = _dbname;}
+    void set_dbuser(std::string _dbuser) {m_dbuser = _dbuser;}
+    void set_dbpass(std::string _dbpass) {m_dbpass = _dbpass;}
+    void reconnect();
     std::shared_ptr<PGconn> connection() const;
     PGconn* res;
     ~PGConnection() {PQfinish(res);}
@@ -25,12 +30,3 @@ private:
     std::shared_ptr<PGconn>  m_connection;
 
 };
-
-PGConnection::PGConnection() {
-    res = PQsetdbLogin(m_dbhost.c_str(), std::to_string(m_dbport).c_str(), nullptr, nullptr, m_dbname.c_str(), m_dbuser.c_str(), m_dbpass.c_str());
-}
-
-PGConnection::PGConnection(std::string _dbname, std::string _dbuser, std::string _dbpass) :
-            m_dbname(_dbname), m_dbuser(_dbuser), m_dbpass(_dbpass) {
-    res = PQsetdbLogin(m_dbhost.c_str(), std::to_string(m_dbport).c_str(), nullptr, nullptr, m_dbname.c_str(), m_dbuser.c_str(), m_dbpass.c_str());
-}

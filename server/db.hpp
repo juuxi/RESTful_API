@@ -1,6 +1,11 @@
 #include "json.hpp" 
+#include <fstream>
+#include "postgreconn.hpp"
 
 class DataBase {
+    PGConnection pg;
+public:
+    DataBase();
     void write(nlohmann::json);
-    void read();
+    nlohmann::json read(nlohmann::json);
 };

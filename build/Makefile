@@ -142,6 +142,19 @@ client/fast:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/client.dir/build.make CMakeFiles/client.dir/build
 .PHONY : client/fast
 
+#=============================================================================
+# Target rules for targets named db
+
+# Build rule for target.
+db: cmake_check_build_system
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 db
+.PHONY : db
+
+# fast build rule for target.
+db/fast:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/db.dir/build.make CMakeFiles/db.dir/build
+.PHONY : db/fast
+
 client/client.o: client/client.cpp.o
 .PHONY : client/client.o
 
@@ -166,29 +179,53 @@ client/client.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/client.dir/build.make CMakeFiles/client.dir/client/client.cpp.s
 .PHONY : client/client.cpp.s
 
-server/dp.o: server/dp.cpp.o
-.PHONY : server/dp.o
+server/db.o: server/db.cpp.o
+.PHONY : server/db.o
 
 # target to build an object file
-server/dp.cpp.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/server.dir/build.make CMakeFiles/server.dir/server/dp.cpp.o
-.PHONY : server/dp.cpp.o
+server/db.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/db.dir/build.make CMakeFiles/db.dir/server/db.cpp.o
+.PHONY : server/db.cpp.o
 
-server/dp.i: server/dp.cpp.i
-.PHONY : server/dp.i
+server/db.i: server/db.cpp.i
+.PHONY : server/db.i
 
 # target to preprocess a source file
-server/dp.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/server.dir/build.make CMakeFiles/server.dir/server/dp.cpp.i
-.PHONY : server/dp.cpp.i
+server/db.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/db.dir/build.make CMakeFiles/db.dir/server/db.cpp.i
+.PHONY : server/db.cpp.i
 
-server/dp.s: server/dp.cpp.s
-.PHONY : server/dp.s
+server/db.s: server/db.cpp.s
+.PHONY : server/db.s
 
 # target to generate assembly for a file
-server/dp.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/server.dir/build.make CMakeFiles/server.dir/server/dp.cpp.s
-.PHONY : server/dp.cpp.s
+server/db.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/db.dir/build.make CMakeFiles/db.dir/server/db.cpp.s
+.PHONY : server/db.cpp.s
+
+server/postgreconn.o: server/postgreconn.cpp.o
+.PHONY : server/postgreconn.o
+
+# target to build an object file
+server/postgreconn.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/db.dir/build.make CMakeFiles/db.dir/server/postgreconn.cpp.o
+.PHONY : server/postgreconn.cpp.o
+
+server/postgreconn.i: server/postgreconn.cpp.i
+.PHONY : server/postgreconn.i
+
+# target to preprocess a source file
+server/postgreconn.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/db.dir/build.make CMakeFiles/db.dir/server/postgreconn.cpp.i
+.PHONY : server/postgreconn.cpp.i
+
+server/postgreconn.s: server/postgreconn.cpp.s
+.PHONY : server/postgreconn.s
+
+# target to generate assembly for a file
+server/postgreconn.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/db.dir/build.make CMakeFiles/db.dir/server/postgreconn.cpp.s
+.PHONY : server/postgreconn.cpp.s
 
 server/server.o: server/server.cpp.o
 .PHONY : server/server.o
@@ -223,13 +260,17 @@ help:
 	@echo "... edit_cache"
 	@echo "... rebuild_cache"
 	@echo "... client"
+	@echo "... db"
 	@echo "... server"
 	@echo "... client/client.o"
 	@echo "... client/client.i"
 	@echo "... client/client.s"
-	@echo "... server/dp.o"
-	@echo "... server/dp.i"
-	@echo "... server/dp.s"
+	@echo "... server/db.o"
+	@echo "... server/db.i"
+	@echo "... server/db.s"
+	@echo "... server/postgreconn.o"
+	@echo "... server/postgreconn.i"
+	@echo "... server/postgreconn.s"
 	@echo "... server/server.o"
 	@echo "... server/server.i"
 	@echo "... server/server.s"

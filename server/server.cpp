@@ -6,8 +6,6 @@
 #include <queue>
 #include <string>
 #include <iostream>
-#include "postgreconn.hpp"
-#include <fstream>
 #include "json.hpp" 
 #include "db.hpp"
 
@@ -16,7 +14,7 @@ class HttpServer {
     void process(void* arg);
     std::queue<std::string> requst_queue;
 public:
-    void waiter(void* arg);
+    void waiter();
 };
 
 int flag_rcv = 0;
@@ -55,9 +53,8 @@ void HttpServer::receive(void* arg) {
 
 void HttpServer::process(void* arg) {
     printf("поток обработки начал работу\n");
-    std::pair<int*, PGConnection*>* args = static_cast<std::pair<int*, PGConnection*>*>(arg);
-    int client_fd = *args->first;
-    PGConnection* pg = args->second;
+    int client_fd = *((int*)arg);
+    free(((int*)arg));
 
     while (flag_process == 0) {
         pthread_mutex_lock(&mutex);
@@ -78,24 +75,13 @@ void HttpServer::process(void* arg) {
             char send_msg[256];
             std::string body;
             std::string status_code;
+            DataBase db;
 
             if (endpoint == "borough") {
                 if (http_method == "GET") {
-                    std::string what, where;
-                    if (data.find("what") != data.end()) { //какие данные нужно вернуть
-                        what = data["what"];
-                    }
-                    if (data.find("where") != data.end()) { //условие
-                        where = data["where"];
-                    }
-                    if (pg->res) {
-                        char query[256];
-                        sprintf(query, "SELECT %s FROM one \
-                            WHERE %s", what.c_str(), where.c_str());
-                        PGresult* res = PQexec(pg->res, query);
-                        std::cout << PQgetvalue(res, 0, 0) << std::endl; //вывести первую ячейку в возвращемой таблице
-                        nlohmann::json j;
-                        j["result"] = PQgetvalue(res, 0, 0);
+                    nlohmann::json j = db.read(data);
+                    std::string result = j["result"];
+                    if (result != "No connection to db") {
                         body = j.dump();
                         std::cout << body << std::endl << std::endl;
                         status_code = "200 OK";
@@ -112,7 +98,7 @@ void HttpServer::process(void* arg) {
                     std::string name="", population="", area="";
                     std::string columns = "", values = "";
 
-                    if (data.find("name") != data.end()) {
+                    /*if (data.find("name") != data.end()) {
                         name = data["name"];
                         columns += "name";
                         values += "'";
@@ -150,7 +136,7 @@ void HttpServer::process(void* arg) {
                             VALUES(%s)", columns.c_str(), values.c_str());
                         PGresult* res = PQexec(pg->res, query);
                         std::cout << std::endl<< "debug " << PQcmdStatus(res) << " debug" << std::endl;
-                    }
+                    }*/
 
                     body = "";
                     status_code = "200 OK";
@@ -194,9 +180,7 @@ void HttpServer::process(void* arg) {
 }
 
 
-void HttpServer::waiter(void* arg) {
-    PGConnection* pg = (PGConnection*)arg; //для дальнейшей передачи в process
-
+void HttpServer::waiter() {
     printf("поток ожидания соединений начал работу\n");
     while (flag_wait == 0) {
         socklen_t len = sizeof(addr);
@@ -209,11 +193,8 @@ void HttpServer::waiter(void* arg) {
             *client_fd1 = client_fd;
             *client_fd2 = client_fd;
 
-            std::pair<int*, PGConnection*>* p = new std::pair<int*, PGConnection*>; //требуется передать сразу 2 аргумента
-            p->first = client_fd2;
-            p->second = pg;
             t1 = new std::thread(&HttpServer::receive, this, client_fd1);
-            t2 = new std::thread(&HttpServer::process, this, p);
+            t2 = new std::thread(&HttpServer::process, this, client_fd2);
         }
     }
     printf("поток ожидания соединений закончил работу\n");
@@ -222,15 +203,6 @@ void HttpServer::waiter(void* arg) {
 int main() {
     printf("программа сервера начала работу\n");
     HttpServer server;
-    std::fstream db_info("../server/db_info.txt"); //подключение к БД, данные берутся из скрытого для посторонних глаз текстового файла
-    std::string db_name;
-    std::string db_user;
-    std::string db_pass;
-    std::getline(db_info, db_name);
-    std::getline(db_info, db_user);
-    std::getline(db_info, db_pass);
-    PGConnection pg(db_name, db_user, db_pass);
-    db_info.close();
 
     pthread_mutex_init(&mutex, NULL);
 
@@ -252,7 +224,7 @@ int main() {
     listen(listen_sock, 100);
 
 
-    std::thread t3(&HttpServer::waiter, server, &pg);
+    std::thread t3(&HttpServer::waiter, server);
     printf("программа ждет нажатия клавиши\n");
     getchar();
     printf("клавиша нажата\n");
