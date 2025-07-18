@@ -15,8 +15,48 @@ DataBase::DataBase() {
     db_info.close();
 }
 
-void DataBase::write(nlohmann::json) {
+void DataBase::write(nlohmann::json data) {
 
+    std::string name="", population="", area="";
+    std::string columns = "", values = "";
+    if (data.find("name") != data.end()) {
+        name = data["name"];
+        columns += "name";
+        values += "'";
+        values += name;
+        values += "'";
+    }
+    if (data.find("population") != data.end()) {
+        population = data["population"];
+        if (!columns.empty()) {
+            columns += ", population";
+            values += ", ";
+            values += population;
+        }
+        else {
+            columns += "population";
+            values += population;
+        }
+    }
+    if (data.find("area") != data.end()) {
+        area = data["area"];
+        if (!columns.empty()) {
+            columns += ", area";
+            values += ", ";
+            values += area;
+        }
+        else {
+            columns += "area";
+            values += area;
+        }
+    }
+
+    if (pg.res) {
+        char query[256];
+        sprintf(query, "INSERT INTO one (%s)\
+            VALUES(%s)", columns.c_str(), values.c_str());
+        PGresult* res = PQexec(pg.res, query);
+    }
 }
 
 nlohmann::json DataBase::read(nlohmann::json data) {

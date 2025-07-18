@@ -95,48 +95,7 @@ void HttpServer::process(void* arg) {
 
                 }
                 if (http_method == "POST") { 
-                    std::string name="", population="", area="";
-                    std::string columns = "", values = "";
-
-                    /*if (data.find("name") != data.end()) {
-                        name = data["name"];
-                        columns += "name";
-                        values += "'";
-                        values += name;
-                        values += "'";
-                    }
-                    if (data.find("population") != data.end()) {
-                        population = data["population"];
-                        if (!columns.empty()) {
-                            columns += ", population";
-                            values += ", ";
-                            values += population;
-                        }
-                        else {
-                            columns += "population";
-                            values += population;
-                        }
-                    }
-                    if (data.find("area") != data.end()) {
-                        area = data["area"];
-                        if (!columns.empty()) {
-                            columns += ", area";
-                            values += ", ";
-                            values += area;
-                        }
-                        else {
-                            columns += "area";
-                            values += area;
-                        }
-                    }
-
-                    if (pg->res) {
-                        char query[256];
-                        sprintf(query, "INSERT INTO one (%s)\
-                            VALUES(%s)", columns.c_str(), values.c_str());
-                        PGresult* res = PQexec(pg->res, query);
-                        std::cout << std::endl<< "debug " << PQcmdStatus(res) << " debug" << std::endl;
-                    }*/
+                    db.write(data);
 
                     body = "";
                     status_code = "200 OK";

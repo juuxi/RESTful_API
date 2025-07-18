@@ -26,7 +26,7 @@ void func1() {
             body = R"({ "what": "name", "where": "area=100"})"; //создание запроса с json-телом
         }
         else {
-            body = R"({ "name": "Queens", "area": "50"})"; //создание запроса с json-телом
+            body = R"({ "name": "Bronx", "area": "75"})"; //создание запроса с json-телом
         }
         sprintf(send_msg, 
             "%s /%s HTTP/1.1\r\n"
