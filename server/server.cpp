@@ -65,7 +65,7 @@ void HttpServer::process(void* arg) {
 
             std::cout << "Сообщение\n" << first_ent << "Принято" << std::endl;
             std::string http_method = first_ent.substr(0, first_ent.find(' '));
-            std::string endpoint = first_ent.substr(first_ent.find('/') + 1, first_ent.find('H') - first_ent.find('/') - 2);
+            std::string endpoint = first_ent.substr(first_ent.find('/') + 1, first_ent.find("HTTP") - first_ent.find('/') - 2);
             std::string entry_body = first_ent.substr(first_ent.find('{'));
             nlohmann::json data;
             if (!entry_body.empty()) {
@@ -100,12 +100,23 @@ void HttpServer::process(void* arg) {
                     body = "";
                     status_code = "200 OK";
                 }
+
+                if (http_method == "PATCH") {
+                    db.update(data);
+
+                    body = "";
+                    status_code = "200 OK";
+                }
             }
 
             else if (endpoint == "ping") {
                 if (http_method == "GET") {
                     body = "Hello from server\n";
                     status_code = "200 OK";
+                }
+                if (http_method == "PATCH") {
+                    body = "You're not allowed to watch this\n";
+                    status_code = "403 Forbidden";
                 }
                 if (http_method == "POST") {
                     body = "You're not allowed to watch this\n";
@@ -114,6 +125,7 @@ void HttpServer::process(void* arg) {
             }
 
             else { //неизвестный endpoint
+                body = "";
                 status_code = "400 Bad Request";
             }
 

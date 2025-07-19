@@ -16,7 +16,6 @@ DataBase::DataBase() {
 }
 
 void DataBase::write(nlohmann::json data) {
-
     std::string name="", population="", area="";
     std::string columns = "", values = "";
     if (data.find("name") != data.end()) {
@@ -81,5 +80,26 @@ nlohmann::json DataBase::read(nlohmann::json data) {
     else {
         j["result"] = "No connection to db";
         return j;
+    }
+}
+
+void DataBase::update(nlohmann::json data) {
+    std::string what, how = "", where;
+    if (data.find("what") != data.end()) { //что заменить
+        what = data["what"];
+    }
+    if (data.find("how") != data.end()) { //на какие данные заменить
+        how += "'";
+        how += data["how"];
+        how += "'";
+    }
+    if (data.find("where") != data.end()) { //условие
+        where = data["where"];
+    }
+    if (pg.res) {
+        char query[256];
+        sprintf(query, "UPDATE one \
+            SET %s = %s WHERE %s", what.c_str(), how.c_str(), where.c_str());
+        PGresult* res = PQexec(pg.res, query);
     }
 }

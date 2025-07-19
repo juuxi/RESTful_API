@@ -17,15 +17,18 @@ std::thread *t1 = nullptr, *t2 = nullptr;
 
 void func1() {
     printf("поток отправки запросов начал работу\n");
-    std::string http_method = "GET";
+    std::string http_method = "PATCH";
     char send_msg[256];
     while(flag_send == 0) {
         std::string endpoint = "borough";
         std::string body;
         if (http_method == "GET") {
-            body = R"({ "what": "name", "where": "area=100"})"; //создание запроса с json-телом
+            body = R"({ "what": "name", "where": "area=50"})"; //создание запроса с json-телом
         }
-        else {
+        else if (http_method == "PATCH") {
+            body = R"({ "what" : "name", "how" : "Staten Island", "where" : "area=50"})";
+        }
+        else if (http_method == "POST") {
             body = R"({ "name": "Bronx", "area": "75"})"; //создание запроса с json-телом
         }
         sprintf(send_msg, 
@@ -83,7 +86,7 @@ void func2() {
                     printf("%s\n", result.c_str());
                 }
                 else {
-                    std::cout << "POST good" << std::endl;
+                    std::cout << "POST|PATCH good" << std::endl;
                 }
                 curr.erase(0, curr.find("HTTP/1.1", 9));
             }

@@ -8,4 +8,5 @@ public:
     DataBase();
     void write(nlohmann::json);
     nlohmann::json read(nlohmann::json);
+    void update(nlohmann::json);
 };
