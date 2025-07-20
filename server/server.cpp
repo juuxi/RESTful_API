@@ -107,6 +107,13 @@ void HttpServer::process(void* arg) {
                     body = "";
                     status_code = "200 OK";
                 }
+
+                if (http_method == "DELETE") {
+                    db.remove(data);
+
+                    body = "";
+                    status_code = "200 OK";
+                }
             }
 
             else if (endpoint == "ping") {
@@ -119,7 +126,12 @@ void HttpServer::process(void* arg) {
                     status_code = "403 Forbidden";
                 }
                 if (http_method == "POST") {
-                    body = "You're not allowed to watch this\n";
+                    body = "You're not allowed to touch this\n";
+                    status_code = "403 Forbidden";
+                }
+
+                if (http_method == "POST") {
+                    body = "You're not allowed to touch this\n";
                     status_code = "403 Forbidden";
                 }
             }

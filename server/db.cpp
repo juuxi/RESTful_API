@@ -103,3 +103,17 @@ void DataBase::update(nlohmann::json data) {
         PGresult* res = PQexec(pg.res, query);
     }
 }
+
+void DataBase::remove(nlohmann::json data) {
+    std::string where;
+    if (data.find("where") != data.end()) {
+        where = data["where"];
+    }
+
+    if (pg.res) {
+        char query[256]; //проверять есть ли такие данные, иначе можно поймать ошибку двойного удаления
+        sprintf(query, "DELETE FROM one \
+            WHERE %s", where.c_str());
+        PGresult* res = PQexec(pg.res, query);
+    }
+}
