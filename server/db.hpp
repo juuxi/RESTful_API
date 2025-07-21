@@ -6,8 +6,8 @@ class DataBase {
     PGConnection pg;
 public:
     DataBase();
-    void write(nlohmann::json);
+    int write(nlohmann::json);
     nlohmann::json read(nlohmann::json);
-    void update(nlohmann::json);
-    void remove(nlohmann::json);
+    int update(nlohmann::json);
+    int remove(nlohmann::json);
 };

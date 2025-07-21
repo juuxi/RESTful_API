@@ -75,7 +75,7 @@ void func2() {
                 int content_length_start = curr.find("Content-Length: ") + 16, content_length_end = curr.find("\r\n", curr.find("Content-Length: "));
                 int length = std::stoi(curr.substr(content_length_start, content_length_end - content_length_start));
 
-                if (curr.find('{') != curr.npos) {
+                if (length && curr.find('{') != curr.npos) {
                     std::string entry_body = curr.substr(curr.find('{'), length);
                     nlohmann::json data;
                     if (!entry_body.empty()) {
@@ -89,7 +89,13 @@ void func2() {
                     printf("%s\n", result.c_str());
                 }
                 else {
-                    std::cout << "POST|PATCH|DELETE good" << std::endl;
+                    int status_code = std::stoi(curr.substr(curr.find(' ') + 1, 3));
+                    if (status_code == 200) {
+                        std::cout << "POST|PATCH|DELETE good" << std::endl;
+                    }
+                    else {
+                        std::cout << curr.substr(curr.find(' ') + 1, curr.find('\r') - curr.find(' ')) << std::endl;
+                    }
                 }
                 curr.erase(0, curr.find("HTTP/1.1", 9));
             }

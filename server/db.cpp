@@ -15,7 +15,7 @@ DataBase::DataBase() {
     db_info.close();
 }
 
-void DataBase::write(nlohmann::json data) {
+int DataBase::write(nlohmann::json data) {
     std::string name="", population="", area="";
     std::string columns = "", values = "";
     if (data.find("name") != data.end()) {
@@ -55,7 +55,11 @@ void DataBase::write(nlohmann::json data) {
         sprintf(query, "INSERT INTO one (%s)\
             VALUES(%s)", columns.c_str(), values.c_str());
         PGresult* res = PQexec(pg.res, query);
+        if (PQcmdTuples(res)[0]-'0' > 0) {
+            return 0;
+        }
     }
+    return 1;
 }
 
 nlohmann::json DataBase::read(nlohmann::json data) {
@@ -72,7 +76,6 @@ nlohmann::json DataBase::read(nlohmann::json data) {
         sprintf(query, "SELECT %s FROM one \
             WHERE %s", what.c_str(), where.c_str());
         PGresult* res = PQexec(pg.res, query);
-        //std::cout << PQgetvalue(res, 0, 0) << std::endl; //вывести первую ячейку в возвращемой таблице
         j["result"] = PQgetvalue(res, 0, 0);
         return j;
     }
@@ -83,7 +86,7 @@ nlohmann::json DataBase::read(nlohmann::json data) {
     }
 }
 
-void DataBase::update(nlohmann::json data) {
+int DataBase::update(nlohmann::json data) {
     std::string what, how = "", where;
     if (data.find("what") != data.end()) { //что заменить
         what = data["what"];
@@ -101,19 +104,27 @@ void DataBase::update(nlohmann::json data) {
         sprintf(query, "UPDATE one \
             SET %s = %s WHERE %s", what.c_str(), how.c_str(), where.c_str());
         PGresult* res = PQexec(pg.res, query);
+        if (PQcmdTuples(res)[0]-'0' > 0) {
+            return 0;
+        }
     }
+    return 1;
 }
 
-void DataBase::remove(nlohmann::json data) {
+int DataBase::remove(nlohmann::json data) {
     std::string where;
     if (data.find("where") != data.end()) {
         where = data["where"];
     }
 
     if (pg.res) {
-        char query[256]; //проверять есть ли такие данные, иначе можно поймать ошибку двойного удаления
+        char query[256]; 
         sprintf(query, "DELETE FROM one \
             WHERE %s", where.c_str());
         PGresult* res = PQexec(pg.res, query);
+        return 0; //если ничего не удаляется - это тоже удача (в случае если данных не было изначально)
+    }
+    else {
+        return 1;
     }
 }

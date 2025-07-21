@@ -95,24 +95,41 @@ void HttpServer::process(void* arg) {
 
                 }
                 if (http_method == "POST") { 
-                    db.write(data);
-
-                    body = "";
-                    status_code = "200 OK";
+                    int res = db.write(data);
+                    if (res == 0) {
+                        body = "";
+                        status_code = "200 OK";
+                    }
+                    else {
+                        body = "";
+                        status_code = "500 Internal Server Error";
+                    }
                 }
 
                 if (http_method == "PATCH") {
-                    db.update(data);
+                    int res = db.update(data);
 
-                    body = "";
-                    status_code = "200 OK";
+                    if (res == 0) {
+                        body = "";
+                        status_code = "200 OK";
+                    }
+                    else {
+                        body = "";
+                        status_code = "500 Internal Server Error";
+                    }
                 }
 
                 if (http_method == "DELETE") {
-                    db.remove(data);
+                    int res = db.remove(data);
 
-                    body = "";
-                    status_code = "200 OK";
+                    if (res == 0) {
+                        body = "";
+                        status_code = "200 OK";
+                    }
+                    else {
+                        body = "";
+                        status_code = "500 Internal Server Error";
+                    }
                 }
             }
 
