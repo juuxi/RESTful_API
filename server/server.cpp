@@ -158,7 +158,6 @@ void HttpServer::process(void* arg) {
         }
     }
     close(client_fd);
-    free(((int*)arg));
     printf("поток обработки закончил работу\n");
 }
 
