@@ -15,11 +15,32 @@ int server_sock;
 struct sockaddr_in addr;
 std::thread *t1 = nullptr, *t2 = nullptr;
 
+int menu() {
+    int res;
+    std::cout << "1. Получить информацию" << std::endl;
+    std::cout << "2. Добавить информацию" << std::endl;
+    std::cout << "3. Изменить информацию" << std::endl;
+    std::cout << "4. Удалить информацию" << std::endl;
+    std::cout << "5. Выход" << std::endl;
+    std::cout << "> ";
+    std::cin >> res;
+    std::cin.clear();
+    return res;
+}
+
 void func1() {
     printf("поток отправки запросов начал работу\n");
-    std::string http_method = "DELETE";
+    std::string http_method;
     char send_msg[256];
     while(flag_send == 0) {
+        switch(menu()) {
+            case 1: http_method = "GET"; break;
+            case 2: http_method = "POST"; break;
+            case 3: http_method = "PATCH"; break;
+            case 4: http_method = "DELETE"; break;
+            case 5: flag_send = 1; break;
+            default: http_method = "INVALID"; break;
+        }
         std::string endpoint = "borough";
         std::string body;
         if (http_method == "GET") {
@@ -46,11 +67,11 @@ void func1() {
         if (rv == -1) {
             perror("send");
             sleep(1);
-        }
+        }/* 
         else {
             http_method == "GET" ? http_method = "POST" : http_method = "GET";
             sleep(2);
-        }
+        } */
     }
     printf("поток отправки запросов закончил работу\n");
 }
@@ -141,18 +162,16 @@ int main() {
     &optval, sizeof(optval));
 
     std::thread t3(func3);
-    printf("программа ждет нажатия клавиши\n");
-    getchar();
-    printf("клавиша нажата\n");
-    flag_send = 1;
-    flag_receive = 1;
-    flag_connect = 1;
-    t3.join();
-    if (t1 && t1->joinable()) {
+    sleep(2); //иначе программа сразу завершается, слушающий поток не успевает запуститься
+    
+    if (t1 && t1->joinable()) { //сначала ждем пока пользователь не нажмет "Выход", потом заканчиваем остальную программу
         t1->join();
         delete t1;
         t1 = nullptr;
     }
+    flag_receive = 1;
+    flag_connect = 1;
+    t3.join();
     if (t2 && t2->joinable()) {
         t2->join();
         delete t2;
