@@ -30,7 +30,6 @@ int menu() {
 }
 
 void func1() {
-    printf("поток отправки запросов начал работу\n");
     char send_msg[256];
     while(flag_send == 0) {
         if (!http_method.empty()) {
@@ -66,11 +65,9 @@ void func1() {
             }
         }
     }
-    printf("поток отправки запросов закончил работу\n");
 }
 
 void func2() {
-    printf("поток обработки ответов начал работу\n");
     while (flag_receive == 0) {
         char rcv_msg[256];
         socklen_t slen = sizeof(addr);
@@ -116,11 +113,9 @@ void func2() {
         }
        sleep(1);
     }
-    printf("поток обработки ответов закончил работу\n");
 }
 
 void func3() {
-    printf("поток установления соединения начал работу\n");
     while (flag_connect == 0) {
         int result = connect(server_sock, (struct sockaddr*)&addr, sizeof(addr));
         if (result == -1) {
@@ -133,12 +128,9 @@ void func3() {
             break;
         }
     }
-    printf("поток установления соединения закончил работу\n");
 }
 
 int main() {
-    printf("программа клиента начала работу\n");
-
     server_sock = socket(AF_INET, SOCK_STREAM, 0);
     fcntl(server_sock, F_SETFL, O_NONBLOCK);
 
@@ -184,6 +176,4 @@ int main() {
     }
 
     close(server_sock);
-
-    printf("программа клиента закончила работу\n");
 }
