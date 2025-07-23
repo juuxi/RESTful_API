@@ -14,6 +14,7 @@ int flag_receive = 0;
 int server_sock;
 struct sockaddr_in addr;
 std::thread *t1 = nullptr, *t2 = nullptr;
+std::string http_method;
 
 int menu() {
     int res;
@@ -30,48 +31,40 @@ int menu() {
 
 void func1() {
     printf("поток отправки запросов начал работу\n");
-    std::string http_method;
     char send_msg[256];
     while(flag_send == 0) {
-        switch(menu()) {
-            case 1: http_method = "GET"; break;
-            case 2: http_method = "POST"; break;
-            case 3: http_method = "PATCH"; break;
-            case 4: http_method = "DELETE"; break;
-            case 5: flag_send = 1; break;
-            default: http_method = "INVALID"; break;
-        }
-        std::string endpoint = "borough";
-        std::string body;
-        if (http_method == "GET") {
-            body = R"({ "what": "name", "where": "area=50" })"; //создание запроса с json-телом
-        }
-        else if (http_method == "PATCH") {
-            body = R"({ "what" : "name", "how" : "Staten Island", "where" : "area=50" })";
-        }
-        else if (http_method == "POST") {
-            body = R"({ "name": "Bronx", "area": "75"})"; //создание запроса с json-телом
-        }
-        else if (http_method == "DELETE") {
-            body = R"({ "where" : "area=75" })";
-        }
-        sprintf(send_msg, 
-            "%s /%s HTTP/1.1\r\n"
-            "Host: localhost:8080\r\n"
-            "User-Agent: curl/8.5.0\r\n"
-            "Accept: */*\r\n"
-            "\r\n"
-            "%s", http_method.c_str(), endpoint.c_str(), body.c_str());
+        if (!http_method.empty()) {
+            std::string endpoint = "borough";
+            std::string body;
+            if (http_method == "GET") {
+                body = R"({ "what": "name", "where": "area=50" })"; //создание запроса с json-телом
+            }
+            else if (http_method == "PATCH") {
+                body = R"({ "what" : "name", "how" : "Staten Island", "where" : "area=50" })";
+            }
+            else if (http_method == "POST") {
+                body = R"({ "name": "Bronx", "area": "75"})"; //создание запроса с json-телом
+            }
+            else if (http_method == "DELETE") {
+                body = R"({ "where" : "area=75" })";
+            }
+            sprintf(send_msg, 
+                "%s /%s HTTP/1.1\r\n"
+                "Host: localhost:8080\r\n"
+                "User-Agent: curl/8.5.0\r\n"
+                "Accept: */*\r\n"
+                "\r\n"
+                "%s", http_method.c_str(), endpoint.c_str(), body.c_str());
 
-        int rv = send(server_sock, send_msg, strlen(send_msg), 0);
-        if (rv == -1) {
-            perror("send");
-            sleep(1);
-        }/* 
-        else {
-            http_method == "GET" ? http_method = "POST" : http_method = "GET";
-            sleep(2);
-        } */
+            int rv = send(server_sock, send_msg, strlen(send_msg), 0);
+            if (rv == -1) {
+                perror("send");
+                sleep(1);
+            }
+            else {
+                http_method = "";
+            }
+        }
     }
     printf("поток отправки запросов закончил работу\n");
 }
@@ -162,16 +155,28 @@ int main() {
     &optval, sizeof(optval));
 
     std::thread t3(func3);
-    sleep(2); //иначе программа сразу завершается, слушающий поток не успевает запуститься
     
-    if (t1 && t1->joinable()) { //сначала ждем пока пользователь не нажмет "Выход", потом заканчиваем остальную программу
+    bool end_flag = false;
+    while (!end_flag) {
+        switch(menu()) {
+            case 1: http_method = "GET"; break;
+            case 2: http_method = "POST"; break;
+            case 3: http_method = "PATCH"; break;
+            case 4: http_method = "DELETE"; break;
+            case 5: end_flag = true; break;
+            default: http_method = "INVALID"; break;
+        }
+    }
+    
+    flag_send = 1;
+    flag_receive = 1;
+    flag_connect = 1;
+    t3.join();
+    if (t1 && t1->joinable()) {
         t1->join();
         delete t1;
         t1 = nullptr;
     }
-    flag_receive = 1;
-    flag_connect = 1;
-    t3.join();
     if (t2 && t2->joinable()) {
         t2->join();
         delete t2;
