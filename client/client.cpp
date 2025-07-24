@@ -30,14 +30,40 @@ int menu() {
     return res;
 }
 
+int db_options_menu() {
+    int res;
+    std::cout << "1. Название" << std::endl;
+    std::cout << "2. Население" << std::endl;
+    std::cout << "3. Площадь" << std::endl;
+    std::cout << "> ";
+    std::cin >> res;
+    std::cin.clear();
+    return res;
+}
+
 void func1() {
     char send_msg[256];
     while(flag_send == 0) {
         if (!http_method.empty()) {
             std::string endpoint = "borough";
             std::string body;
+
+            std::string what, how, where, name, area, population;
             if (http_method == "GET") {
-                body = R"({ "what": "name", "where": "area=50" })"; //создание запроса с json-телом
+                std::cout << "Какую информацию вы хотите получить?" << std::endl;
+                switch(db_options_menu()) {
+                    case 1: what = "name"; break;
+                    case 2: what = "population"; break;
+                    case 3: what = "area"; break;
+                }
+                std::cout << "При каком условии?" << std::endl;
+                std::cin >> where;
+                body = "{ \"what\": \"";
+                body += what;
+                body += "\", \"where\": \"";
+                body += where;
+                body += "\" }";
+                //body = "R({ "what": "name", "where": "area=50" })";
             }
             else if (http_method == "PATCH") {
                 body = R"({ "what" : "name", "how" : "Staten Island", "where" : "area=50" })";
@@ -48,6 +74,7 @@ void func1() {
             else if (http_method == "DELETE") {
                 body = R"({ "where" : "area=75" })";
             }
+
             sprintf(send_msg, 
                 "%s /%s HTTP/1.1\r\n"
                 "Host: localhost:8080\r\n"
