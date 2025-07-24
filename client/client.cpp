@@ -88,7 +88,52 @@ void func1() {
                 //body = R"({ "what" : "name", "how" : "Staten Island", "where" : "area=50" })";
             }
             else if (http_method == "POST") {
-                body = R"({ "name": "Bronx", "area": "75"})"; 
+                std::cout << "Какую информацию вы хотите добавить?" << std::endl;
+                std::cout << "Если вся нужная информация введена - нажмите любую другую цифру" << std::endl;
+                bool end_input_flag = false;
+                while (!end_input_flag) {
+                    switch(db_options_menu()) {
+                        case 1: 
+                            if (body.empty()) {
+                                body = "{ \"name\": \"";
+                            }
+                            else {
+                                body += "\", \"name\": \"";
+                            }
+                            std::cout << "Введите название" << std::endl;
+                            std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+                            std::getline(std::cin, name);
+                            body += name;
+                            break;
+                        case 2: 
+                            if (body.empty()) {
+                                body = "{ \"population\": \"";
+                            }
+                            else {
+                                body += "\", \"population\": \"";
+                            }
+                            std::cout << "Введите название" << std::endl;
+                            std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+                            std::getline(std::cin, population);
+                            body += population;
+                            break;
+                        case 3:
+                            if (body.empty()) {
+                                body = "{ \"area\": \"";
+                            }
+                            else {
+                                body += "\", \"area\": \"";
+                            }
+                            std::cout << "Введите название" << std::endl;
+                            std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+                            std::getline(std::cin, area);
+                            body += area;
+                            break;
+                        default: end_input_flag = true; break;
+                    }
+                }
+                body += "\" }";
+                //body = R"({ "name": "Bronx", "area": "75"})"; 
             }
             else if (http_method == "DELETE") {
                 std::cout << "При каком условии вы хотите удалить информацию?" << std::endl;
