@@ -15,6 +15,7 @@ int server_sock;
 struct sockaddr_in addr;
 std::thread *t1 = nullptr, *t2 = nullptr;
 std::string http_method;
+int response_printed = 1;
 
 int menu() {
     int res;
@@ -98,14 +99,17 @@ void func2() {
                     }
                     
                     printf("%s\n", result.c_str());
+                    response_printed = 1;
                 }
                 else {
                     int status_code = std::stoi(curr.substr(curr.find(' ') + 1, 3));
                     if (status_code == 200) {
                         std::cout << "POST|PATCH|DELETE good" << std::endl;
+                        response_printed = 1;
                     }
                     else {
                         std::cout << curr.substr(curr.find(' ') + 1, curr.find('\r') - curr.find(' ')) << std::endl;
+                        response_printed = 1;
                     }
                 }
                 curr.erase(0, curr.find("HTTP/1.1", 9));
@@ -150,6 +154,9 @@ int main() {
     
     bool end_flag = false;
     while (!end_flag) {
+        while (!response_printed) {
+
+        }
         switch(menu()) {
             case 1: http_method = "GET"; break;
             case 2: http_method = "POST"; break;
@@ -158,6 +165,7 @@ int main() {
             case 5: end_flag = true; break;
             default: http_method = "INVALID"; break;
         }
+        response_printed = 0;
     }
     
     flag_send = 1;
