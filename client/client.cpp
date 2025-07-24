@@ -88,10 +88,16 @@ void func1() {
                 //body = R"({ "what" : "name", "how" : "Staten Island", "where" : "area=50" })";
             }
             else if (http_method == "POST") {
-                body = R"({ "name": "Bronx", "area": "75"})"; //создание запроса с json-телом
+                body = R"({ "name": "Bronx", "area": "75"})"; 
             }
             else if (http_method == "DELETE") {
-                body = R"({ "where" : "area=75" })";
+                std::cout << "При каком условии вы хотите удалить информацию?" << std::endl;
+                std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+                std::getline(std::cin, where);
+                body = "{ \"where\": \"";
+                body += where;
+                body += "\" }";
+                //body = R"({ "where" : "area=75" })";
             }
 
             sprintf(send_msg, 
