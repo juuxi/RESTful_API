@@ -57,7 +57,8 @@ void func1() {
                     case 3: what = "area"; break;
                 }
                 std::cout << "При каком условии?" << std::endl;
-                std::cin >> where;
+                std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+                std::getline(std::cin, where);
                 body = "{ \"what\": \"";
                 body += what;
                 body += "\", \"where\": \"";
@@ -66,7 +67,25 @@ void func1() {
                 //body = "R({ "what": "name", "where": "area=50" })";
             }
             else if (http_method == "PATCH") {
-                body = R"({ "what" : "name", "how" : "Staten Island", "where" : "area=50" })";
+                std::cout << "Какую информацию вы хотите изменить?" << std::endl;
+                switch(db_options_menu()) {
+                    case 1: what = "name"; break;
+                    case 2: what = "population"; break;
+                    case 3: what = "area"; break;
+                }
+                std::cout << "На что вы хотите заменить информацию?" << std::endl;
+                std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+                std::getline(std::cin, how);
+                std::cout << "При каком условии?" << std::endl;
+                std::getline(std::cin, where);
+                body = "{ \"what\": \"";
+                body += what;
+                body += "\", \"how\" : \"";
+                body += how;
+                body += "\", \"where\": \"";
+                body += where;
+                body += "\" }";
+                //body = R"({ "what" : "name", "how" : "Staten Island", "where" : "area=50" })";
             }
             else if (http_method == "POST") {
                 body = R"({ "name": "Bronx", "area": "75"})"; //создание запроса с json-телом
