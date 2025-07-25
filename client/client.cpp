@@ -112,7 +112,7 @@ void func1() {
                             else {
                                 body += "\", \"population\": \"";
                             }
-                            std::cout << "Введите название" << std::endl;
+                            std::cout << "Введите население" << std::endl;
                             std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
                             std::getline(std::cin, population);
                             body += population;
@@ -124,7 +124,7 @@ void func1() {
                             else {
                                 body += "\", \"area\": \"";
                             }
-                            std::cout << "Введите название" << std::endl;
+                            std::cout << "Введите площадь" << std::endl;
                             std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
                             std::getline(std::cin, area);
                             body += area;
@@ -219,11 +219,7 @@ void func2() {
 void func3() {
     while (flag_connect == 0) {
         int result = connect(server_sock, (struct sockaddr*)&addr, sizeof(addr));
-        if (result == -1) {
-            perror("connect");
-            sleep(1);
-        }
-        else {  
+        if (result != -1) {  
             t1 = new std::thread(func1);
             t2 = new std::thread(func2);
             break;
@@ -231,7 +227,13 @@ void func3() {
     }
 }
 
+void sig_handler(int) {
+    close(server_sock);
+    exit(0);
+}
+
 int main() {
+    signal(SIGINT, sig_handler);
     server_sock = socket(AF_INET, SOCK_STREAM, 0);
     fcntl(server_sock, F_SETFL, O_NONBLOCK);
 
@@ -239,9 +241,6 @@ int main() {
     addr.sin_port = htons(8080);
     addr.sin_addr.s_addr = inet_addr("127.0.0.1");
     int rv = bind(server_sock, (struct sockaddr*)&addr, sizeof(addr));
-    if (rv == -1) {
-        perror("bind");
-    }
 
     int optval = 1;
     setsockopt(server_sock, SOL_SOCKET, SO_REUSEADDR,

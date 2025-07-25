@@ -199,8 +199,15 @@ void HttpServer::waiter() {
     printf("поток ожидания соединений закончил работу\n");
 }
 
+void sig_handler(int) {
+    close(client_sock);
+    close(listen_sock);
+    exit(0);
+}
+
 int main() {
     printf("программа сервера начала работу\n");
+    signal(SIGINT, sig_handler);
     HttpServer server;
 
     pthread_mutex_init(&mutex, NULL);
