@@ -78,6 +78,10 @@ void HttpServer::process(void* arg) {
             DataBase db;
 
             if (endpoint == "borough") {
+                if (http_method == "HEAD") {
+                    status_code = "200 OK";
+                    body = "";
+                }
                 if (http_method == "GET") {
                     nlohmann::json j = db.read(data);
                     std::string result = j["result"];
@@ -134,6 +138,10 @@ void HttpServer::process(void* arg) {
             }
 
             else if (endpoint == "ping") {
+                if (http_method == "HEAD") {
+                    body = "";
+                    status_code = "200 OK";
+                }
                 if (http_method == "GET") {
                     body = "Hello from server\n";
                     status_code = "200 OK";
